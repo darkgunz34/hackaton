@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Entity
 @Data
@@ -15,6 +14,5 @@ public class ClientSegment implements Serializable {
     private String id;
     private String name;
     private String salaryClass;
-    private List<User> users;
     private boolean hasChildren;
 }

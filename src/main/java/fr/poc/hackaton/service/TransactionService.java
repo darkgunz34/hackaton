@@ -3,6 +3,7 @@ package fr.poc.hackaton.service;
 import fr.poc.hackaton.business.dto.Category;
 import fr.poc.hackaton.business.dto.Insight;
 import fr.poc.hackaton.business.dto.Transaction;
+import fr.poc.hackaton.business.dto.User;
 import fr.poc.hackaton.business.usecase.CreateTransaction;
 import fr.poc.hackaton.repository.TransactionRepository;
 import lombok.AllArgsConstructor;

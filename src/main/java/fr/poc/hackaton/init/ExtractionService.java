@@ -18,12 +18,13 @@ import java.util.concurrent.*;
 public class ExtractionService implements CommandLineRunner {
 
     private final CategoryService categoryService;
+    private final ClientSegmentService clientSegmentService;
     private final InsightService insightService;
     private final BankAccountService bankAccountService;
     private final TransactionService transactionService;
     private final UserService userService;
 
-    private static final int MAX_THREADS = 5;
+    private static final int MAX_THREADS = 1;
     private static final int BATCH_SIZE = 5000; // nombre de lignes traitées en une fois
     private static final int QUEUE_CAPACITY = 1000000;
 
@@ -40,7 +41,7 @@ public class ExtractionService implements CommandLineRunner {
         }
 
         try (CSVReader reader = new CSVReader(
-                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("fichier.csv")))) {
+                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("edf.csv")))) {
 
             reader.readNext(); // saute l'entête
             String[] champs;
@@ -48,6 +49,9 @@ public class ExtractionService implements CommandLineRunner {
             while ((champs = reader.readNext()) != null) {
                 queue.put(champs);
                 nb++;
+                if(nb == 10000) {
+                    break;
+                }
                 if (nb % 10000 == 0) {
                     System.out.println("Lignes lues : " + nb);
                 }
@@ -103,6 +107,8 @@ public class ExtractionService implements CommandLineRunner {
         // 1) Extraire tous les DTOs du batch
         List<ExtractionDto> dtos = new ArrayList<>(batch.size());
         for (String[] champs : batch) {
+            ExtractionDto dto = extractData(champs);
+            if(dto == null) continue;
             dtos.add(extractData(champs));
         }
 
@@ -177,7 +183,8 @@ public class ExtractionService implements CommandLineRunner {
             if (processedUserPairs.add(key)) {
                 BankAccount ba = bankAccounts.get(baId);
                 if (ba != null) {
-                    userService.getUser(userId, ba);
+                    User user = userService.getUser(userId, ba);
+                    this.hardCode(user);
                 }
             }
         }
@@ -185,8 +192,21 @@ public class ExtractionService implements CommandLineRunner {
         System.out.println("Batch de " + batch.size() + " lignes traité par " + Thread.currentThread().getName());
     }
 
+    private void hardCode(User user){
+        if(user.getUserId().equals("0218a4cd6e5c5f0f1a9113a86592f133a9cb2a6a49f7248267540b4fca1098bc") || user.getUserId().equals("009b1e40f11177cd17fdfe4746fc3d6413fd22e0cb36e1438f862a3627b6c248") || user.getUserId().equals("0218a4cd6e5c5f0f1a9113a86592f133a9cb2a6a49f7248267540b4fca1098bc")
+         || user.getUserId().equals("0491e7311b94a9d7cb99a7ea5d180f063ca831fbc0b8743928b278b08563111f")
+        ){
+            ClientSegment clientSegment = this.clientSegmentService.getClientSegment("1");
+            user.setClientSegment(clientSegment);
+            userService.updateUser(user);
+        }
+    }
+
     private ExtractionDto extractData(String[] champs) {
         ExtractionDto dto = new ExtractionDto();
+        if(!"power".equals(getChamp(champs,11))){
+            return null;
+        }
         dto.setUserId(getChamp(champs, 0));
         dto.setTransactionId(getChamp(champs, 1));
         dto.setBankAccountId(getChamp(champs, 2));
@@ -223,26 +243,5 @@ public class ExtractionService implements CommandLineRunner {
 
     private Insight processInsight(ExtractionDto dto) {
         return insightService.getInsight(dto.getInsightsCategoryName(), dto.getInsightsThirdPartyName(), dto.getInsightsMerchantLogoUrl());
-    }
-
-    private Transaction processTransaction(ExtractionDto dto, Category category, Insight insight) {
-        return transactionService.getTransaction(
-                dto.getTransactionId(),
-                dto.getDatePosted() != null ? java.time.LocalDate.parse(dto.getDatePosted()) : null,
-                dto.getTrntype(),
-                dto.getOriginalLabel(),
-                dto.getThirdParty(),
-                dto.getAmount() != null ? Double.parseDouble(dto.getAmount()) : null,
-                category,
-                insight
-        );
-    }
-
-    private BankAccount getBankAccount(String bankAccountId, Transaction transaction) {
-        return bankAccountService.getBankAccount(bankAccountId, transaction);
-    }
-
-    private User getUser(String userId, BankAccount bankAccount) {
-        return userService.getUser(userId, bankAccount);
     }
 }

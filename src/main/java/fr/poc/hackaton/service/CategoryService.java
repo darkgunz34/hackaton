@@ -15,7 +15,7 @@ public class CategoryService {
     private final CreateCategorie createCategorie;
     private final CategoryRepository categoryRepository;
 
-    public synchronized Category getCategory(String id, String logoUrl, String name) {
+    public synchronized Category getCategory(String id, String name, String logoUrl) {
         if(Objects.equals(id, "uncategorized")){
             return null;
         }
