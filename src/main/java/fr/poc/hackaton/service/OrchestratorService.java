@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,11 +47,13 @@ public class OrchestratorService {
             for (var transaction : bankAccountNew.getTransactions()) {
                 String categoryName = transaction.getCategory() != null ? transaction.getCategory().getInsightsCategoryName() : "uncategorized";
                 Balance balance = lstBalance.stream()
-                        .filter(b -> b.getNameCategory().equals(categoryName))
+                        .filter(b -> b.getNameCategory().equals(categoryName) && b.getDate().equals(transaction.getDatePosted().format(DateTimeFormatter.ofPattern("MM/yyyy"))))
                         .findFirst()
                         .orElse(null);
                 if (balance == null) {
                     balance = new Balance();
+                    String moisAnnee = transaction.getDatePosted().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+                    balance.setDate(moisAnnee);
                     balance.setNameCategory(categoryName);
                     balance.setCount(0);
                     balance.setSum(0.0);
@@ -80,7 +83,7 @@ public class OrchestratorService {
                 for (var transaction : bankAccount.getTransactions()) {
                     if (lstBalance.stream().anyMatch(b -> b.getNameCategory().equals(transaction.getCategory() != null ? transaction.getCategory().getInsightsCategoryName() : "uncategorized"))) {
                         Balance balance = lstBalance.stream()
-                                .filter(b -> b.getNameCategory().equals(transaction.getCategory() != null ? transaction.getCategory().getInsightsCategoryName() : "uncategorized"))
+                                .filter(b -> b.getNameCategory().equals(transaction.getCategory() != null ? transaction.getCategory().getInsightsCategoryName() : "uncategorized") && b.getDate().equals(transaction.getDatePosted().format(DateTimeFormatter.ofPattern("MM/yyyy"))))
                                 .findFirst()
                                 .orElse(null);
                         if (balance != null && transaction.getDatePosted().isAfter(startDate) && transaction.getDatePosted().isBefore(endDate)) {

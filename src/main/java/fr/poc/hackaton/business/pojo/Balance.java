@@ -9,6 +9,7 @@ public class Balance {
     private double sum;
     private String nameCategory;
     private double average;
+    private String date;
 
     private double averageSegment;
     private double countSegment;
