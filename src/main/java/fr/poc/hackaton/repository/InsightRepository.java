@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InsightRepository extends JpaRepository<Insight, Integer> {
 
-    Insight findByInsightsCategoryName(String insightsCategoryName);
+    Insight findByInsightsCategoryNameAndInsightsThirdPartyName(String insightsCategoryName, String insightsThirdPartyName);
 }

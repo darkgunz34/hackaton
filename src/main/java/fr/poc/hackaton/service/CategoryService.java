@@ -22,7 +22,6 @@ public class CategoryService {
         Category category = this.categoryRepository.findByInsightsCategoryId(id);
         if (category == null) {
             category = this.categoryRepository.save(this.createCategorie.createCategory(id, logoUrl, name));
-            System.out.println("Creating new category : " + id);
         }
         return category;
     }

@@ -1,9 +1,6 @@
 package fr.poc.hackaton.business.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,7 +12,12 @@ public class Insight implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer insightId;
 
+    @Column(columnDefinition = "text")
     private String insightsCategoryName;
+
+    @Column(columnDefinition = "text")
     private String insightsThirdPartyName;
+
+    @Column(columnDefinition = "text")
     private String insightsMerchantLogoUrl;
 }

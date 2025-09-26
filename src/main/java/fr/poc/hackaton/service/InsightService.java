@@ -14,10 +14,9 @@ public class InsightService {
     private final InsightRepository insightRepository;
 
     public synchronized Insight getInsight(String insightsCategoryName, String insightsThirdPartyName, String insightsMerchantLogoUrl) {
-        Insight insight = this.insightRepository.findByInsightsCategoryName(insightsCategoryName);
+        Insight insight = this.insightRepository.findByInsightsCategoryNameAndInsightsThirdPartyName(insightsCategoryName, insightsThirdPartyName);
         if (insight == null) {
             insight = this.insightRepository.save(this.createInsight.createInsight(insightsCategoryName, insightsThirdPartyName, insightsMerchantLogoUrl));
-            System.out.println("Creating new insight : " + insightsCategoryName);
         }
         return insight;
     }
